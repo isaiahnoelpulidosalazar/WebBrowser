@@ -1,3 +1,8 @@
+// current version - 1.0.0
+
+// changes:
+// - initial build
+
 namespace WebBrowser
 {
     internal static class Program
