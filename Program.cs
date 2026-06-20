@@ -1,7 +1,7 @@
-// current version - 1.0.0
+// current version - 1.0.1
 
 // changes:
-// - initial build
+// - update browser with history and downloads
 
 namespace WebBrowser
 {
