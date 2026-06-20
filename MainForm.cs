@@ -9,6 +9,8 @@ namespace WebBrowser
         private Panel activeTabItem = null;
         private bool isAdjustingWidths = false;
 
+        private readonly List<HistoryItem> sessionHistory = new List<HistoryItem>();
+
         public MainForm()
         {
             InitializeComponent();
@@ -30,10 +32,7 @@ namespace WebBrowser
                 int clientWidth = tabPanel.ClientSize.Width;
                 int targetWidth = clientWidth - 6;
 
-                if (targetWidth < 50)
-                {
-                    targetWidth = 50;
-                }
+                if (targetWidth < 50) targetWidth = 50;
 
                 foreach (Control ctrl in tabPanel.Controls)
                 {
@@ -103,7 +102,7 @@ namespace WebBrowser
                 BackColor = SystemColors.Control,
                 Cursor = Cursors.Hand
             };
-            
+
             int initialWidth = Math.Max(50, tabPanel.ClientSize.Width - 6);
             tabItem.Width = initialWidth;
 
@@ -139,12 +138,10 @@ namespace WebBrowser
             tabItem.Controls.Add(btnClose);
 
             AdjustInternalTabControls(tabItem, initialWidth);
-
             tabPanel.Controls.Add(tabItem);
 
             AdjustTabWidths();
             tabPanel.PerformLayout();
-
             tabPanel.ScrollControlIntoView(tabItem);
 
             SelectTab(tabItem);
@@ -179,10 +176,7 @@ namespace WebBrowser
                     if (tabItem == selectedTab)
                     {
                         tabItem.BackColor = SystemColors.GradientActiveCaption;
-                        if (lbl != null)
-                        {
-                            lbl.BackColor = SystemColors.GradientActiveCaption;
-                        }
+                        if (lbl != null) lbl.BackColor = SystemColors.GradientActiveCaption;
 
                         if (webView != null)
                         {
@@ -193,10 +187,7 @@ namespace WebBrowser
                     else
                     {
                         tabItem.BackColor = SystemColors.Control;
-                        if (lbl != null)
-                        {
-                            lbl.BackColor = SystemColors.Control;
-                        }
+                        if (lbl != null) lbl.BackColor = SystemColors.Control;
 
                         if (webView != null)
                         {
@@ -241,10 +232,7 @@ namespace WebBrowser
         {
             foreach (Control c in tabItem.Controls)
             {
-                if (c is Label lbl)
-                {
-                    return lbl;
-                }
+                if (c is Label lbl) return lbl;
             }
             return null;
         }
@@ -279,6 +267,15 @@ namespace WebBrowser
             return url;
         }
 
+        private void NavigateCurrent(string url)
+        {
+            var webView = GetCurrentWebView();
+            if (webView != null && webView.CoreWebView2 != null)
+            {
+                webView.Source = new Uri(NormalizeUrl(url));
+            }
+        }
+
         private void CoreWebView2_NewWindowRequested(object sender, CoreWebView2NewWindowRequestedEventArgs e)
         {
             e.Handled = true;
@@ -299,6 +296,9 @@ namespace WebBrowser
             var webView = sender as WebView2;
             if (webView != null)
             {
+                string documentTitle = webView.CoreWebView2?.DocumentTitle;
+                string currentUrl = webView.Source.ToString();
+
                 foreach (Control ctrl in tabPanel.Controls)
                 {
                     if (ctrl is Panel tabItem && tabItem.Tag == webView)
@@ -306,10 +306,20 @@ namespace WebBrowser
                         Label lbl = GetLabelFromTabItem(tabItem);
                         if (lbl != null)
                         {
-                            lbl.Text = webView.CoreWebView2.DocumentTitle;
+                            lbl.Text = string.IsNullOrWhiteSpace(documentTitle) ? currentUrl : documentTitle;
                         }
                         break;
                     }
+                }
+
+                if (e.IsSuccess)
+                {
+                    sessionHistory.Add(new HistoryItem
+                    {
+                        Title = string.IsNullOrWhiteSpace(documentTitle) ? currentUrl : documentTitle,
+                        Url = currentUrl,
+                        VisitedTime = DateTime.Now
+                    });
                 }
             }
         }
@@ -321,6 +331,7 @@ namespace WebBrowser
             {
                 tabItem = (sender as Control)?.Tag as Panel;
             }
+
             if (tabItem != null)
             {
                 SelectTab(tabItem);
@@ -340,22 +351,14 @@ namespace WebBrowser
 
         private void btnGo_Click(object sender, EventArgs e)
         {
-            var webView = GetCurrentWebView();
-            if (webView != null)
-            {
-                webView.Source = new Uri(NormalizeUrl(txtUrl.Text));
-            }
+            NavigateCurrent(txtUrl.Text);
         }
 
         private void txtUrl_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
             {
-                var webView = GetCurrentWebView();
-                if (webView != null)
-                {
-                    webView.Source = new Uri(NormalizeUrl(txtUrl.Text));
-                }
+                NavigateCurrent(txtUrl.Text);
                 e.SuppressKeyPress = true;
             }
         }
@@ -378,9 +381,70 @@ namespace WebBrowser
             }
         }
 
+        private void btnRefresh_Click(object sender, EventArgs e)
+        {
+            var webView = GetCurrentWebView();
+            if (webView != null)
+            {
+                webView.Reload();
+            }
+        }
+
         private void btnSidebarNewTab_Click(object sender, EventArgs e)
         {
             AddNewTab(DefaultUrl);
+        }
+
+        private void btnHistory_Click(object sender, EventArgs e)
+        {
+            using (Form historyForm = new Form())
+            {
+                historyForm.Text = "Session History";
+                historyForm.Size = new Size(550, 400);
+                historyForm.StartPosition = FormStartPosition.CenterParent;
+                historyForm.MinimizeBox = false;
+                historyForm.MaximizeBox = false;
+                historyForm.FormBorderStyle = FormBorderStyle.FixedDialog;
+
+                ListBox lstHistory = new ListBox
+                {
+                    Dock = DockStyle.Fill,
+                    DisplayMember = "ToString"
+                };
+
+                for (int i = sessionHistory.Count - 1; i >= 0; i--)
+                {
+                    lstHistory.Items.Add(sessionHistory[i]);
+                }
+
+                lstHistory.DoubleClick += (s, ev) =>
+                {
+                    if (lstHistory.SelectedItem is HistoryItem selectedItem)
+                    {
+                        NavigateCurrent(selectedItem.Url);
+                        historyForm.Close();
+                    }
+                };
+
+                historyForm.Controls.Add(lstHistory);
+                historyForm.ShowDialog(this);
+            }
+        }
+
+        private void btnDownloads_Click(object sender, EventArgs e)
+        {
+            var webView = GetCurrentWebView();
+            if (webView != null && webView.CoreWebView2 != null)
+            {
+                try
+                {
+                    webView.CoreWebView2.OpenDefaultDownloadDialog();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Failed to display downloads UI: {ex.Message}", "Interface Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
         }
     }
 }

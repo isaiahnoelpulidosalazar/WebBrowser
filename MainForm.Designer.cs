@@ -31,8 +31,11 @@
             panelTop = new Panel();
             btnBack = new Button();
             btnForward = new Button();
+            btnRefresh = new Button();
             txtUrl = new TextBox();
             btnGo = new Button();
+            btnHistory = new Button();
+            btnDownloads = new Button();
             panelLeftSidebar = new Panel();
             tabPanel = new VerticalFlowLayoutPanel();
             btnSidebarNewTab = new Button();
@@ -45,8 +48,11 @@
             // 
             panelTop.Controls.Add(btnBack);
             panelTop.Controls.Add(btnForward);
+            panelTop.Controls.Add(btnRefresh);
             panelTop.Controls.Add(txtUrl);
             panelTop.Controls.Add(btnGo);
+            panelTop.Controls.Add(btnHistory);
+            panelTop.Controls.Add(btnDownloads);
             panelTop.Dock = DockStyle.Top;
             panelTop.Location = new Point(0, 0);
             panelTop.Margin = new Padding(4, 3, 4, 3);
@@ -59,7 +65,7 @@
             btnBack.Location = new Point(14, 12);
             btnBack.Margin = new Padding(4, 3, 4, 3);
             btnBack.Name = "btnBack";
-            btnBack.Size = new Size(47, 29);
+            btnBack.Size = new Size(41, 29);
             btnBack.TabIndex = 0;
             btnBack.Text = "<";
             btnBack.UseVisualStyleBackColor = true;
@@ -67,36 +73,71 @@
             // 
             // btnForward
             // 
-            btnForward.Location = new Point(68, 12);
+            btnForward.Location = new Point(62, 12);
             btnForward.Margin = new Padding(4, 3, 4, 3);
             btnForward.Name = "btnForward";
-            btnForward.Size = new Size(47, 29);
+            btnForward.Size = new Size(41, 29);
             btnForward.TabIndex = 1;
             btnForward.Text = ">";
             btnForward.UseVisualStyleBackColor = true;
             btnForward.Click += btnForward_Click;
             // 
+            // btnRefresh
+            // 
+            btnRefresh.Location = new Point(110, 12);
+            btnRefresh.Margin = new Padding(4, 3, 4, 3);
+            btnRefresh.Name = "btnRefresh";
+            btnRefresh.Size = new Size(41, 29);
+            btnRefresh.TabIndex = 2;
+            btnRefresh.Text = "↻";
+            btnRefresh.UseVisualStyleBackColor = true;
+            btnRefresh.Click += btnRefresh_Click;
+            // 
             // txtUrl
             // 
             txtUrl.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            txtUrl.Location = new Point(121, 14);
+            txtUrl.Location = new Point(158, 14);
             txtUrl.Margin = new Padding(4, 3, 4, 3);
             txtUrl.Name = "txtUrl";
-            txtUrl.Size = new Size(956, 23);
-            txtUrl.TabIndex = 2;
+            txtUrl.Size = new Size(750, 23);
+            txtUrl.TabIndex = 3;
             txtUrl.KeyDown += txtUrl_KeyDown;
             // 
             // btnGo
             // 
             btnGo.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnGo.Location = new Point(1085, 12);
+            btnGo.Location = new Point(913, 12);
             btnGo.Margin = new Padding(4, 3, 4, 3);
             btnGo.Name = "btnGo";
-            btnGo.Size = new Size(77, 29);
-            btnGo.TabIndex = 3;
+            btnGo.Size = new Size(58, 29);
+            btnGo.TabIndex = 4;
             btnGo.Text = "Go";
             btnGo.UseVisualStyleBackColor = true;
             btnGo.Click += btnGo_Click;
+            // 
+            // btnHistory
+            // 
+            btnHistory.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnHistory.Location = new Point(978, 12);
+            btnHistory.Margin = new Padding(4, 3, 4, 3);
+            btnHistory.Name = "btnHistory";
+            btnHistory.Size = new Size(88, 29);
+            btnHistory.TabIndex = 5;
+            btnHistory.Text = "History";
+            btnHistory.UseVisualStyleBackColor = true;
+            btnHistory.Click += btnHistory_Click;
+            // 
+            // btnDownloads
+            // 
+            btnDownloads.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnDownloads.Location = new Point(1071, 12);
+            btnDownloads.Margin = new Padding(4, 3, 4, 3);
+            btnDownloads.Name = "btnDownloads";
+            btnDownloads.Size = new Size(91, 29);
+            btnDownloads.TabIndex = 6;
+            btnDownloads.Text = "Downloads";
+            btnDownloads.UseVisualStyleBackColor = true;
+            btnDownloads.Click += btnDownloads_Click;
             // 
             // panelLeftSidebar
             // 
@@ -172,8 +213,11 @@
         private System.Windows.Forms.Panel panelTop;
         private System.Windows.Forms.Button btnBack;
         private System.Windows.Forms.Button btnForward;
+        private System.Windows.Forms.Button btnRefresh;
         private System.Windows.Forms.TextBox txtUrl;
         private System.Windows.Forms.Button btnGo;
+        private System.Windows.Forms.Button btnHistory;
+        private System.Windows.Forms.Button btnDownloads;
         private System.Windows.Forms.Panel panelLeftSidebar;
         private VerticalFlowLayoutPanel tabPanel;
         private System.Windows.Forms.Button btnSidebarNewTab;
